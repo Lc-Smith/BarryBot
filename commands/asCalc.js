@@ -119,10 +119,10 @@ module.exports = {
 	if (interaction.user.id === "301313670850543616") {
 		var arrayTime = TimeCalc(hits);
 		var totalHit = pasEXP + hits;
-		await interaction.editReply("You said from `" + cLevel + "` to `" + gLevel + "`, with a multiplier of `" + totalMulti + "`, and you chose fireball to be `" + fBall + "`. \nThis would take `" + hits + "` melee/fire hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`. \nWith a total of `" + pasEXP + "` passive incomes, totalling at `" + totalHit + "` hits. \nExpected first level hit count: " + HitCalc(level));
+		await interaction.editReply("You said from `" + cLevel + "` to `" + gLevel + "`, with a multiplier of `" + totalMulti + "`, and you chose fireball to be `" + fBall + "`. \nThis would take `" + hits + "` hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`. \nWith a total of `" + pasEXP + "` passive incomes, totalling at `" + totalHit + "` hits. \nExpected first level hit count: " + HitCalc(level));
 	} else {
 		TimeCalc();
-		await interaction.editReply("You said from `" + cLevel + "` to `" + gLevel + "`, with a multiplier of `" + totalMulti + "`, and you chose fireball to be `" + fBall + "`. \nThis would take `" + hits + "` melee/fire hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`.");
+		await interaction.editReply("You said from `" + cLevel + "` to `" + gLevel + "`, with a multiplier of `" + totalMulti + "`, and you chose fireball to be `" + fBall + "`. \nThis would take `" + hits + "` hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`.");
 	}
   },
 };
