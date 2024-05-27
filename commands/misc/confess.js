@@ -30,9 +30,7 @@ module.exports = {
     const embed = new EmbedBuilder()
 			.setColor('#000000')
 			.setTitle('Anonymous Confession')
-			.addFields(
-				{ name: '', value: message },
-			)
+      .setDescription(message)
 			.setTimestamp();
 
     await channel.send({
