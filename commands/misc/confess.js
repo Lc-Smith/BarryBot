@@ -24,7 +24,7 @@ module.exports = {
     const channel = interaction.guild.channels.cache.get(anonCommand.channelId);
 
     if (!channel) {
-      return interaction.reply('The anonymous channel has been deleted!');
+      return interaction.reply({ content: 'The anonymous channel has been deleted!', ephemeral: true });
     }
 
     const embed = new EmbedBuilder()
@@ -37,7 +37,7 @@ module.exports = {
       embeds: [embed],
     });
 
-    await interaction.reply('Message sent!');
+    await interaction.reply({ content: 'Message sent!', ephemeral: true });
     
 
 
