@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const AnonCommands = require('../../schemas/anoncommands');
 
 module.exports = {
@@ -27,7 +27,6 @@ module.exports = {
       return interaction.reply('The anonymous channel has been deleted!');
     }
 
-    await channel.send(message);
     const embed = new EmbedBuilder()
 			.setColor('#000000')
 			.setTitle('Anonymous Confession')
