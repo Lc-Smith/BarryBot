@@ -11,6 +11,6 @@ module.exports = {
 	async execute(interaction) {
     const inDamage = interaction.options.getInteger('damage');
     var intLevel = inDamage / 2 - 5;
-    await interaction.reply("People who deal `" + inDamage + "` damage are level `" + intLevel + "`.");
+    await interaction.reply("`" + inDamage + "` damage is level `" + intLevel + "`.");
   },
 };

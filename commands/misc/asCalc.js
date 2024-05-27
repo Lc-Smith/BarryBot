@@ -28,24 +28,18 @@ module.exports = {
     .addBooleanOption(option =>
       option.setName('fireball')
         .setDescription('Do you have fireball?')
-        .setRequired(false))
-    // Bonus Multiplier
-    .addIntegerOption(option =>
-      option.setName('bonusmulti')
-        .setDescription('Is there a bonus multiplier ingame, if so how much?')
         .setRequired(false)),
-
 	async execute(interaction) {
     await interaction.deferReply();
 
     const cLevel = interaction.options.getInteger('currentlevel'); // Current level
     const gLevel = interaction.options.getInteger('goallevel'); // Level goal
     const fBall = interaction.options.getBoolean('fireball'); // Fireball bool
-	const totalMulti = (interaction.options.getInteger('multiplier') + interaction.options.getInteger('bonusmulti')); // Full Multiplier total
+	const totalMulti = (interaction.options.getInteger('multiplier')); // Full Multiplier total
 	var level = cLevel // Level used for maths
     var cEXP; // EXP to level
     var EXP = 0; // EXP count
-    var cTime = 0; // Current time
+	var tEXP = 0; // Total EXP
     var hits = 0; // Hit count
 	var pasEXP = 0; // passive EXP variable
 	// Last timed using Non-GP Red Penguin 00/00/00
@@ -56,7 +50,7 @@ module.exports = {
 
 	// Function for calculating hits at current level
 	function HitCalc(level) {
-		var outEXP = level * 1000; // First level EXP needed
+		var outEXP = level * 1000; // First level EXP
 
 		if (level >= 5000) {
 			var outHits = (outEXP / (((1000 * totalMulti) + level) + 5000)).toFixed(2);
@@ -64,17 +58,6 @@ module.exports = {
 			var outHits = (outEXP / ((1000 * totalMulti) + level)).toFixed(2);
 		}
 		return outHits;
-	}
-	// Passive EXP
-	function PassiveEXP(level) {
-		if (fBall) cTime += fTime;
-		else cTime += nFTime;
-
-		if (cTime >= 4.57) {
-			EXP = EXP + ((1000 * totalMulti) + level);
-			cTime -= 4.57; // This is to reset the time so that passive experience gain doesn't spam
-			pasEXP = pasEXP + 1;
-		}
 	}
 	// Function for calculating the time
 	function TimeCalc(hits) {
@@ -103,6 +86,8 @@ module.exports = {
 
 	while (level < gLevel) {
 		cEXP = level * 1000; // Calc current level EXP
+		tEXP += level * 1000; // Total level calc
+
 		while (EXP <= cEXP) {
 			// Hit calculation, if 5k+ then cave dummies
 			if (level >= 5000) EXP += ((1000 * totalMulti) + level) + 5000;
@@ -117,7 +102,7 @@ module.exports = {
 	var arrayTime = TimeCalc(hits);
 	if (interaction.user.id === "301313670850543616") {
 		var totalHit = pasEXP + hits;
-		await interaction.editReply("Inputs: `" + cLevel + "`, `" + gLevel + "`, `" + totalMulti + "`, `" + fBall + "`. \nThis should take `" + hits + "` hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`. \nPassive incomes: `" + pasEXP + "`. Total hits: `" + totalHit + "`. \nExpected first level hits: " + HitCalc(level));
+		await interaction.editReply("Inputs: `" + cLevel + "`, `" + gLevel + "`, `" + totalMulti + "`, `" + fBall + "`. \nThis should take `" + hits + "` hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`. \nPassive incomes: `" + pasEXP + "`. Total EXP: `" + tEXP +"`. Total hits: `" + totalHit + "`. \nExpected first level hits: " + HitCalc(level));
 	} else {
 		await interaction.editReply("Please be aware that due to human based timings, this is an estimation, it may not be accurate. \nYour choices should take `" + hits + "` hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`.");
 	}
