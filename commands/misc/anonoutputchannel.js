@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -7,9 +7,11 @@ module.exports = {
     .addChannelOption(option =>
       option.setName('channel')
         .setDescription('Select output channel')
-        .setRequired(true)),
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	async execute(interaction) {
         var outputChannel = interaction.options.getChannel('channel');
-        console.log(outputChannel);
+        console.log(outputChannel.id);
+        await interaction.reply({ content: "Setting channel...", ephemeral: true});
   },
 };
