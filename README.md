@@ -12,6 +12,8 @@ https://www.w3schools.com/js
 
 Node.JS & modules for Discord.JS
 
+You will need a config.json with the "clientId" and bot "token"
+
 ## Commands
 
 More commands may be present but not listed.
