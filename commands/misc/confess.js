@@ -31,7 +31,7 @@ module.exports = {
 			.setColor('#000000')
 			.setTitle('Anonymous Confession')
 			.addFields(
-				{ value: message },
+				{ name: '', value: message },
 			)
 			.setTimestamp();
 
