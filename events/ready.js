@@ -9,13 +9,18 @@ module.exports = {
 
 		const dbString = `${dbUrl}/${dbName}`;
 		mongoose.set('strictQuery', false);
-		await mongoose.connect(dbString).then(() => {
-			console.log('Connected to database!');
-		}).catch((err) => {
-			console.log('Error connecting to database: ' + err);
+		mongoose.connection.on('error', (err) => {
+			console.error('Mongoose connection error:', err);
 		});
 
-		console.log("Ready!");
+		try {
+			await mongoose.connect(dbString);
+			console.log('Connected to database!');
+		} catch (err) {
+			console.error('Error connecting to database:', err);
+		}
+
+		console.log('Ready!');
 	    client.user.setActivity("with Lc's feelings");
 	},
 };

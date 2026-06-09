@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { createEmbed } = require('../../utils/embed');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -23,22 +24,33 @@ module.exports = {
 	async execute(interaction) {
     const inLevel = interaction.options.getInteger('level');
     const intTitle = interaction.options.getInteger('title');
-    const intHealth = (( inLevel * 2 ) + 10) * 10;
-    var titleName = "";
-    // Title name set
-    if (intTitle == 25000) titleName = "Executioner";
-    if (intTitle == 50000) titleName = "Destroyer";
-    if (intTitle == 100000) titleName = "Supreme Reaper";
-    if (intTitle == 250000) titleName = "Notorious Gladiator";
-    if (intTitle == 500000) titleName = "Legend";
-    if (intTitle == 1000000) titleName = "God";
-    // Outputs
-    if (!intTitle === null) {
-      await interaction.reply("People who are level `" + inLevel + "` have `" + intHealth + "` health.");
+    const baseHealth = ((inLevel * 2) + 10) * 10;
+    const titleNames = {
+      25000: 'Executioner',
+      50000: 'Destroyer',
+      100000: 'Supreme Reaper',
+      250000: 'Notorious Gladiator',
+      500000: 'Legend',
+      1000000: 'God',
+    };
+    const titleName = titleNames[intTitle] || null;
+
+    let description;
+    if (intTitle === null) {
+      description = `People who are level **${inLevel}** have **${baseHealth}** health.`;
     } else {
-      const fullHealth = intHealth + intTitle;
+      const fullHealth = baseHealth + intTitle;
       const outLevel = ((fullHealth / 10) - 10) / 2;
-      await interaction.reply("Level `" + inLevel + "` with " + titleName + " title has `" + fullHealth + "` health. Equal to level `" + outLevel + "`!");
+      description = `Level **${inLevel}** with **${titleName}** title has **${fullHealth}** health. Equal to level **${outLevel}**!`;
     }
+
+    const embed = createEmbed({
+      title: 'Health Estimate',
+      description,
+      color: 0x00cc99,
+      interaction,
+    });
+
+    await interaction.reply({ embeds: [embed] });
   },
 };

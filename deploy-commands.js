@@ -1,5 +1,5 @@
 const { REST, Routes } = require('discord.js');
-const { clientId, token } = require('./config.json');
+const { clientId, token, guildId } = require('./config.json');
 const path = require('node:path');
 const fs = require('node:fs');
 
@@ -25,21 +25,28 @@ for (const folder of commandFolders) {
 }
 
 // Construct and prepare an instance of the REST module
-const rest = new REST().setToken(token);
+const rest = new REST({ version: '10' }).setToken(token);
 
+if (!commands.length) {
+	console.log('No commands found to deploy.');
+	process.exit(0);
+}
 
 // and deploy your commands!
 (async () => {
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-		// The put method is used to fully refresh all commands in the guild with the current set
-		const data = await rest.put(
-			Routes.applicationCommands(clientId),
-			{ body: commands },
-		);
+		const route = guildId
+			? Routes.applicationGuildCommands(clientId, guildId)
+			: Routes.applicationCommands(clientId);
+
+		const data = await rest.put(route, { body: commands });
 
 		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+		if (guildId) {
+			console.log(`Deployed commands to guild ${guildId}.`);
+		}
 	} catch (error) {
 		// And of course, make sure you catch and log any errors!
 		console.error(error);

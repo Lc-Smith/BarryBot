@@ -1,29 +1,30 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { createEmbed } = require('../../utils/embed');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ascalc')
 		.setDescription('Calculates the amount of time it would take for you to level up if grinding.')
-    // Current Level
-    .addIntegerOption(option =>
-      option.setName('currentlevel')
-        .setDescription('What is your current level?')
-        .setRequired(true))
-    // Goal Level
-    .addIntegerOption(option =>
-      option.setName('goallevel')
-        .setDescription('What level do you want to be?')
-        .setRequired(true))
-    // Multiplier
-    .addIntegerOption(option =>
-      option.setName('multiplier')
-        .setDescription('What gamepass multiplier do you have?')
-        .setRequired(true)
-        .addChoices(
-          { name: 'No multi', value: 1 },
-          { name: '8x multi', value: 8 },
-          { name: '13x multi', value: 13 },
-        ))
+		// Current Level
+		.addIntegerOption(option =>
+			option.setName('currentlevel')
+				.setDescription('What is your current level?')
+				.setRequired(true))
+		// Goal Level
+		.addIntegerOption(option =>
+			option.setName('goallevel')
+				.setDescription('What level do you want to be?')
+				.setRequired(true))
+		// Multiplier
+		.addIntegerOption(option =>
+			option.setName('multiplier')
+				.setDescription('What gamepass multiplier do you have?')
+				.setRequired(true)
+				.addChoices(
+					{ name: 'No multi', value: 1 },
+					{ name: '8x multi', value: 8 },
+					{ name: '13x multi', value: 13 },
+		))
     // Fireball
     .addBooleanOption(option =>
       option.setName('fireball')
@@ -32,79 +33,102 @@ module.exports = {
 	async execute(interaction) {
     await interaction.deferReply();
 
-    const cLevel = interaction.options.getInteger('currentlevel'); // Current level
-    const gLevel = interaction.options.getInteger('goallevel'); // Level goal
-    const fBall = interaction.options.getBoolean('fireball'); // Fireball bool
-	const totalMulti = (interaction.options.getInteger('multiplier')); // Full Multiplier total
-	var level = cLevel // Level used for maths
-    var cEXP; // EXP to level
-    var EXP = 0; // EXP count
-	var tEXP = 0; // Total EXP
-    var hits = 0; // Hit count
-	var pasEXP = 0; // passive EXP variable
-	// Last timed using Non-GP Red Penguin 00/00/00
-		// Melee + fBall = 105 / 60 = 1.75
-		// Melee = 84 / 60 = 1.4
-	var fTime = 1 / 1.75; //fireball time
-	var nFTime = 1 / 1.4; //no fireball time
+    try {
+      const cLevel = interaction.options.getInteger('currentlevel'); // Current level
+      const gLevel = interaction.options.getInteger('goallevel'); // Level goal
+      const fBall = interaction.options.getBoolean('fireball') ?? false; // Fireball bool
+      const totalMulti = interaction.options.getInteger('multiplier'); // Full Multiplier total
 
-	// Function for calculating hits at current level
-	function HitCalc(level) {
-		var outEXP = level * 1000; // First level EXP
+      if (gLevel <= cLevel) {
+        const errorEmbed = createEmbed({
+          title: 'Invalid Levels',
+          description: 'Goal level must be higher than your current level.',
+          color: 0xff0000,
+          interaction,
+        });
+        return await interaction.editReply({ embeds: [errorEmbed] });
+      }
 
-		if (level >= 5000) {
-			var outHits = (outEXP / (((1000 * totalMulti) + level) + 5000)).toFixed(2);
-		} else if (level < 5000) {
-			var outHits = (outEXP / ((1000 * totalMulti) + level)).toFixed(2);
-		}
-		return outHits;
-	}
-	// Function for calculating the time
-	function TimeCalc(hits) {
-		// Fireball info for time calculation
-		if (fBall === true) var time = hits/1.75;
-		else {
-			var time = hits/1.4;
-			fBall == false;
-		}
+      let level = cLevel;
+      let currentExp = 0;
+      let hits = 0;
+      let totalExp = 0;
+      const passiveExp = 0;
 
-		// Calculating time
-		time = parseInt(time, 10); // Formats time
+      const expPerHit = (lvl) => (1000 * totalMulti) + lvl + (lvl >= 5000 ? 5000 : 0);
+      const hitCalc = (lvl) => {
+        const expNeeded = lvl * 1000;
+        return (expNeeded / expPerHit(lvl)).toFixed(2);
+      };
+      const timeCalc = (hitCount) => {
+        const divisor = fBall ? 1.75 : 1.4;
+        let seconds = Math.floor(hitCount / divisor);
 
-		var days = Math.floor(time / 86400); // Calculates days
-		var hours   = Math.floor((time - (days * 86400)) / 3600); // Calculates hours
-		var minutes = Math.floor((time - (days * 86400) - (hours * 3600)) / 60); // Calculates minutes
-		var seconds = time - (days * 86400) - (hours * 3600) - (minutes * 60); // Calculates seconds
+        const days = Math.floor(seconds / 86400);
+        seconds -= days * 86400;
+        const hours = Math.floor(seconds / 3600);
+        seconds -= hours * 3600;
+        const minutes = Math.floor(seconds / 60);
+        seconds -= minutes * 60;
 
-		// Formatting time
-		if (days < 10) days = "0" + days;
-		if (hours < 10) hours = "0" + hours;
-		if (minutes < 10) minutes = "0" + minutes;
-		if (seconds < 10) seconds = "0" + seconds;
-		return [days, hours, minutes, seconds];
-	}
+        const pad = (value) => String(value).padStart(2, '0');
+        return [pad(days), pad(hours), pad(minutes), pad(seconds)];
+      };
 
-	while (level < gLevel) {
-		cEXP = level * 1000; // Calc current level EXP
-		tEXP += level * 1000; // Total level calc
+      while (level < gLevel) {
+        const cap = level * 1000;
+        totalExp += cap;
+        const need = Math.max(0, cap - currentExp);
+        const hitsForLevel = Math.ceil(need / expPerHit(level));
 
-		while (EXP <= cEXP) {
-			// Hit calculation, if 5k+ then cave dummies
-			if (level >= 5000) EXP += ((1000 * totalMulti) + level) + 5000;
-			else if (level < 5000) EXP += (1000 * totalMulti) + level;
-			hits = hits + 1;
-		}
-		level += 1;
-		EXP -= cEXP; // Since 1 level is added, remove extra xp
-	}
+        hits += hitsForLevel;
+        currentExp += hitsForLevel * expPerHit(level);
+        currentExp -= cap;
+        level += 1;
+      }
 
-	// Replying in the chosen format
-	var arrayTime = TimeCalc(hits);
-	if (interaction.user.id === "301313670850543616") {
-		var totalHit = pasEXP + hits;
-		await interaction.editReply("Inputs: `" + cLevel + "`, `" + gLevel + "`, `" + totalMulti + "`, `" + fBall + "`. \nThis should take `" + hits + "` hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`. \nPassive incomes: `" + pasEXP + "`. Total EXP: `" + tEXP +"`. Total hits: `" + totalHit + "`. \nExpected first level hits: " + HitCalc(level));
-	} else {
-		await interaction.editReply("Please be aware that due to human based timings, this is an estimation, it may not be accurate. \nYour choices should take `" + hits + "` hits over `" + arrayTime[0] + " Days and " + arrayTime[1] + ":" + arrayTime[2] + ":" + arrayTime[3] + "`.");
-	}
+      const arrayTime = timeCalc(hits);
+      const fields = [
+        {
+          name: 'Inputs',
+          value: `Current Level: **${cLevel}**\nGoal Level: **${gLevel}**\nMultiplier: **${totalMulti}x**\nFireball: **${fBall ? 'Yes' : 'No'}**`,
+          inline: false,
+        },
+        {
+          name: 'Estimated Result',
+          value: `This should take **${hits}** hits over **${arrayTime[0]} Days ${arrayTime[1]}:${arrayTime[2]}:${arrayTime[3]}**.`,
+          inline: false,
+        },
+      ];
+
+      if (interaction.user.id === '301313670850543616') {
+        const totalHit = passiveExp + hits;
+        fields.push({
+          name: 'Owner Details',
+          value: `Passive income: **${passiveExp}**\nTotal EXP: **${totalExp}**\nTotal hits: **${totalHit}**\nExpected first level hits: **${hitCalc(level)}**`,
+          inline: false,
+        });
+      }
+
+      const embed = createEmbed({
+        title: 'AS Calc Results',
+        description: 'Please be aware that due to human based timings, this is an estimation and may not be accurate.',
+        color: 0x9900ff,
+        fields,
+        interaction,
+      });
+
+      await interaction.editReply({ embeds: [embed] });
+    } catch (error) {
+      console.error('AS Calc failed:', error);
+      const errorEmbed = createEmbed({
+        title: 'Calculation Failed',
+        description: 'There was a problem generating the result. Please try again later.',
+        color: 0xff0000,
+        fields: [{ name: 'Error', value: `${error.message ?? 'Unknown error'}`, inline: false }],
+        interaction,
+      });
+      await interaction.editReply({ embeds: [errorEmbed] });
+    }
   },
 };

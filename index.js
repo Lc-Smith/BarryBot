@@ -6,6 +6,15 @@ const fs = require('node:fs');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.commands = new Collection();
 
+client.on('error', console.error);
+client.on('warn', console.warn);
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 

@@ -1,4 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
+const { createEmbed } = require('../../utils/embed');
 const AnonCommands = require('../../schemas/anoncommands');
 
 module.exports = {
@@ -10,36 +11,46 @@ module.exports = {
         .setDescription('Input message')
         .setRequired(true)),
 	async execute(interaction) {
+    await interaction.deferReply({ ephemeral: true });
 
+    try {
+      const message = interaction.options.getString('message');
+      const guildId = interaction.guild.id;
 
-    const message = interaction.options.getString('message');
-    const guildId = interaction.guild.id;
+      const anonCommand = await AnonCommands.findOne({ guildId: guildId });
 
-    const anonCommand = await AnonCommands.findOne({ guildId: guildId });
+      if (!anonCommand) {
+        return interaction.editReply({ content: 'This server does not have an anonymous channel set up!' });
+      }
 
-    if (!anonCommand) {
-      return interaction.reply({ content: 'This server does not have an anonymous channel set up!', ephemeral: true });
+      const channel = interaction.guild.channels.cache.get(anonCommand.channelId);
+
+      if (!channel) {
+        return interaction.editReply({ content: 'The anonymous channel has been deleted!' });
+      }
+
+      const anonEmbed = createEmbed({
+        title: 'Anonymous Confession',
+        description: message,
+        color: 0x000000,
+      });
+
+      await channel.send({ embeds: [anonEmbed] });
+
+      const replyEmbed = createEmbed({
+        title: 'Confession Sent',
+        description: 'Your anonymous message has been delivered.',
+        color: 0x00cc66,
+        interaction,
+      });
+      await interaction.editReply({ embeds: [replyEmbed] });
+    } catch (error) {
+      console.error('Error executing confess command:', error);
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply({ content: 'There was an error while executing this command!' });
+      } else {
+        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+      }
     }
-
-    const channel = interaction.guild.channels.cache.get(anonCommand.channelId);
-
-    if (!channel) {
-      return interaction.reply({ content: 'The anonymous channel has been deleted!', ephemeral: true });
-    }
-
-    const embed = new EmbedBuilder()
-			.setColor('#000000')
-			.setTitle('Anonymous Confession')
-      .setDescription(message)
-			.setTimestamp();
-
-    await channel.send({
-      embeds: [embed],
-    });
-
-    await interaction.reply({ content: 'Message sent!', ephemeral: true });
-    
-
-
   },
 };
