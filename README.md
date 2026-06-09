@@ -1,57 +1,102 @@
 # Barry Bot
 
-This is an open source Discord Application created by LcSmith for general usage with some specific elements.
+Barry Bot is an open-source Discord bot created by LcSmith. It provides general utility, dice-rolling tools, moderation commands, and some Roblox Animal Simulator helper commands.
 
-Author: LcSmith
+## Features
 
-References:
-https://discordjs.guide/,
-https://www.w3schools.com/js
+- Slash commands for general server info and user info
+- Dice rolling: `/roll`, `/dmroll`, `/abilityroll`
+- Moderation commands: `/ban`, `/kick`, `/mute`, `/unmute`, `/warn`, `/warnings`
+- Animal Simulator helper commands: `/ascalc`, `/ascoins`, `/asdamage`, `/ashealth`, `/ashits`, `/aslevel`
+- Confession support: `/confess`, `/setconfessions`
 
-## Dependencies
+## Requirements
 
-Node.JS & modules for Discord.JS
+- Node.js (recommended v18 or newer)
+- A Discord bot application with a token
+- A MongoDB connection for warning/confession persistence
 
-You will need a config.json with the "clientId" and bot "token"
+## Setup
 
-## Commands
+1. Clone the repository.
+2. Install dependencies:
 
-More commands may be present but not listed.
+```bash
+npm install
+```
 
-help - This replies with a help page
+3. Copy `example.env` to `.env` and fill in your values:
 
-ping - This replies with pong, used to test bot response speed
+```env
+CLIENT_ID=your_client_id_here
+TOKEN=your_bot_token_here
+GUILD_ID=your_guild_id_here
+DB_URL=your_mongodb_connection_string_here
+DB_NAME=BarryBot
+```
 
-ability - This rolls ability dice for DnD style RPG games
+- `CLIENT_ID` is your bot application ID.
+- `TOKEN` is your bot token.
+- `GUILD_ID` is optional; if provided, commands deploy only to that guild for faster testing.
+- `DB_URL` and `DB_NAME` are used by mongoose to connect to MongoDB.
 
-dmroll - This rolls dice but only the user can see the output
+## Running the Bot
 
-roll - This rolls dice
+1. Deploy the slash commands:
 
-### Animal Simulator (Roblox) commands
+```bash
+node deploy-commands.js
+```
 
-asCalc - This is a calculation for the time it takes to reach a level goal
+2. Start the bot:
 
-asDamage - This calculates the damage dealt based on level
+```bash
+node index.js
+```
 
-asHealth - This calculates the health based on level
+3. Stop the bot with `Ctrl + C` or by closing the terminal.
 
-asLevel - This calculates the level based on damage
+## Available Commands
 
-## Utilisation
+### General
 
-### To launch the bot:
+- `/help` — Display the help response.
+- `/ping` — Check bot latency.
+- `/serverinfo` — Show information about the current server.
+- `/userinfo` — Show information about a user.
 
-1. Open terminal into main
+### Dice
 
-3. Run the below commands in order:
+- `/roll` — Roll dice with a command input.
+- `/dmroll` — Roll dice privately via DM output.
+- `/abilityroll` — Roll D&D ability score dice.
 
-- node deploy-commands.js
+### Moderation
 
-- node index.js
+- `/ban` — Ban a user.
+- `/kick` — Kick a user.
+- `/mute` — Mute a user.
+- `/unmute` — Unmute a user.
+- `/warn` — Issue a warning to a user.
+- `/warnings` — View warnings for a user.
 
-### To turn the bot off, one of the following methods:
+### Miscellaneous
 
-1. Hold Ctrl and press C
+- `/ascalc` — Calculate time to reach an Animal Simulator level goal.
+- `/ascoins` — Estimate coin earnings.
+- `/asdamage` — Calculate damage based on level.
+- `/ashealth` — Calculate health based on level.
+- `/ashits` — Calculate experience between levels.
+- `/aslevel` — Calculate level from damage.
+- `/confess` — Submit an anonymous confession.
+- `/setconfessions` — Set the confession channel.
 
-3. Close the terminal
+## Notes
+
+- The bot loads commands from the `commands` folder and registers them via `deploy-commands.js`.
+- MongoDB is used by the bot on startup; if the connection fails, the bot logs the error.
+
+## License
+
+This repository is maintained by LcSmith.
+
