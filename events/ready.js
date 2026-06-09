@@ -1,13 +1,13 @@
+require('dotenv').config();
 const { Events } = require('discord.js');
 const mongoose = require('mongoose');
-const { dbUrl, dbName } = require('../config.json');
 
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client) {
 
-		const dbString = `${dbUrl}/${dbName}`;
+		const dbString = `${process.env.DB_URL}/${process.env.DB_NAME}`;
 		mongoose.set('strictQuery', false);
 		mongoose.connection.on('error', (err) => {
 			console.error('Mongoose connection error:', err);

@@ -1,5 +1,5 @@
+require('dotenv').config();
 const { REST, Routes } = require('discord.js');
-const { clientId, token, guildId } = require('./config.json');
 const path = require('node:path');
 const fs = require('node:fs');
 
@@ -25,7 +25,7 @@ for (const folder of commandFolders) {
 }
 
 // Construct and prepare an instance of the REST module
-const rest = new REST({ version: '10' }).setToken(token);
+const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
 if (!commands.length) {
 	console.log('No commands found to deploy.');
@@ -37,15 +37,15 @@ if (!commands.length) {
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-		const route = guildId
-			? Routes.applicationGuildCommands(clientId, guildId)
-			: Routes.applicationCommands(clientId);
+		const route = process.env.GUILD_ID
+			? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID)
+			: Routes.applicationCommands(process.env.CLIENT_ID);
 
 		const data = await rest.put(route, { body: commands });
 
 		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
-		if (guildId) {
-			console.log(`Deployed commands to guild ${guildId}.`);
+		if (process.env.GUILD_ID) {
+			console.log(`Deployed commands to guild ${process.env.GUILD_ID}.`);
 		}
 	} catch (error) {
 		// And of course, make sure you catch and log any errors!
